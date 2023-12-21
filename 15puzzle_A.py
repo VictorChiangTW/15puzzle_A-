@@ -8,12 +8,12 @@ class PuzzleAStar15:
     def get_successors(self, state):
         successors = []
         zero_index = state.index('x')
-        row, col = zero_index // 4, zero_index % 4  # 4x4 拼圖
+        row, col = zero_index // 4, zero_index % 4
 
         directions = [('up', -1, 0), ('down', 1, 0), ('left', 0, -1), ('right', 0, 1)]
         for direction, row_change, col_change in directions:
             new_row, new_col = row + row_change, col + col_change
-            if 0 <= new_row < 4 and 0 <= new_col < 4:  # 確保不超出 4x4 拼圖範圍
+            if 0 <= new_row < 4 and 0 <= new_col < 4:
                 new_zero_index = new_row * 4 + new_col
                 new_state = list(state)
                 new_state[zero_index], new_state[new_zero_index] = new_state[new_zero_index], 'x'
@@ -25,11 +25,19 @@ class PuzzleAStar15:
         return state == self.goal_state
 
     def heuristic(self, state):
-        # 這裡你可以選擇一個適合 15-puzzle 的啟發式函數
-        # 例如：錯位瓦片數或曼哈頓距離
         return sum([1 if state[i] != self.goal_state[i] else 0 for i in range(16)])
 
+def is_solvable(state):
+    sequence = [c for c in state if c != 'x']
+    inversions = sum(sequence[i] > sequence[j] for i in range(len(sequence)) for j in range(i + 1, len(sequence)))
+
+    row_from_bottom = 4 - (state.index('x') // 4)
+    return (inversions + row_from_bottom) % 2 == 0
+
 def a_star_search(puzzle, start):
+    if not is_solvable(start):
+        return None
+
     frontier = []
     heapq.heappush(frontier, (0, start))
     came_from = {start: None}
@@ -42,7 +50,7 @@ def a_star_search(puzzle, start):
             return reconstruct_path(came_from, current_state)
 
         for next_state in puzzle.get_successors(current_state):
-            new_cost = cost_so_far[current_state] + 1  # 假設每次移動成本為 1
+            new_cost = cost_so_far[current_state] + 1
             if next_state not in cost_so_far or new_cost < cost_so_far[next_state]:
                 cost_so_far[next_state] = new_cost
                 priority = new_cost + puzzle.heuristic(next_state)
@@ -61,7 +69,6 @@ def reconstruct_path(came_from, end):
 
 # 使用示例
 puzzle = PuzzleAStar15("7eb58cdax24f6391")
-# start_state = "123456789abxcdef"  # 這裡輸入你的初始狀態
 solution = a_star_search(puzzle, puzzle.state)
 
 if solution:
@@ -71,4 +78,4 @@ if solution:
             print(state[i:i+4])
         print()
 else:
-    print("No solution found.")
+    print("No solution found or the puzzle is unsolvable.")
