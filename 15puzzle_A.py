@@ -1,9 +1,9 @@
 import heapq
 
 class PuzzleAStar15:
-    def __init__(self, initial_state):
+    def __init__(self, initial_state, goal_state="7eb58cda2x4f6391"):
         self.state = initial_state
-        self.goal_state = "7eb58cda2x4f6391"  # 15-puzzle 的目標狀態
+        self.goal_state = goal_state
 
     def get_successors(self, state):
         successors = []
@@ -25,17 +25,26 @@ class PuzzleAStar15:
         return state == self.goal_state
 
     def heuristic(self, state):
+        # 這裡可以根據需要選擇合適的啟發式函數
         return sum([1 if state[i] != self.goal_state[i] else 0 for i in range(16)])
 
-def is_solvable(state):
-    sequence = [c for c in state if c != 'x']
-    inversions = sum(sequence[i] > sequence[j] for i in range(len(sequence)) for j in range(i + 1, len(sequence)))
+def get_index_map(goal_state):
+    return {char: index for index, char in enumerate(goal_state)}
 
+def count_inversions(state, index_map):
+    sequence = [c for c in state if c != 'x']
+    mapped_sequence = [index_map[c] for c in sequence]
+    inversions = sum(mapped_sequence[i] > mapped_sequence[j] for i in range(len(mapped_sequence)) for j in range(i + 1, len(mapped_sequence)))
+    return inversions
+
+def is_solvable(state, goal_state):
+    index_map = get_index_map(goal_state)
+    inversions = count_inversions(state, index_map)
     row_from_bottom = 4 - (state.index('x') // 4)
     return (inversions + row_from_bottom) % 2 == 0
 
 def a_star_search(puzzle, start):
-    if not is_solvable(start):
+    if not is_solvable(start, puzzle.goal_state):
         return None
 
     frontier = []
@@ -68,8 +77,9 @@ def reconstruct_path(came_from, end):
     return path
 
 # 使用示例
-puzzle = PuzzleAStar15("7eb58cdax24f6391")
-solution = a_star_search(puzzle, puzzle.state)
+start_state = "7eb5xcda824f6391"
+puzzle = PuzzleAStar15(start_state)
+solution = a_star_search(puzzle, start_state)
 
 if solution:
     print("Solution found in {} steps:".format(len(solution) - 1))
