@@ -52,6 +52,7 @@ def a_star_search(puzzle, start):
     heapq.heappush(frontier, (0, start))
     came_from = {start: None}
     cost_so_far = {start: 0}
+    visited_states = set([start])
 
     while frontier:
         current_priority, current_state = heapq.heappop(frontier)
@@ -60,12 +61,16 @@ def a_star_search(puzzle, start):
             return reconstruct_path(came_from, current_state)
 
         for next_state in puzzle.get_successors(current_state):
+            if next_state in visited_states:
+                continue
+
             new_cost = cost_so_far[current_state] + 1
             if next_state not in cost_so_far or new_cost < cost_so_far[next_state]:
                 cost_so_far[next_state] = new_cost
                 priority = new_cost + puzzle.heuristic(next_state)
                 heapq.heappush(frontier, (priority, next_state))
                 came_from[next_state] = current_state
+                visited_states.add(next_state)
 
     return None
 
@@ -85,7 +90,7 @@ def generate_random_state(base_state):
 # 使用示例
 base_state = "7eb58cda2x4f6391"
 start_state = generate_random_state(base_state)
-print(start_state)
+print("Start state:", start_state)
 puzzle = PuzzleAStar15(start_state)
 solution = a_star_search(puzzle, start_state)
 
