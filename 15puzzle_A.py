@@ -1,4 +1,5 @@
 import heapq
+import random
 
 class PuzzleAStar15:
     def __init__(self, initial_state, goal_state="7eb58cda2x4f6391"):
@@ -76,8 +77,15 @@ def reconstruct_path(came_from, end):
     path.reverse()
     return path
 
+def generate_random_state(base_state):
+    state_list = list(base_state)
+    random.shuffle(state_list)
+    return ''.join(state_list)
+
 # 使用示例
-start_state = "7eb5xcda824f6391"
+base_state = "7eb58cda2x4f6391"
+start_state = generate_random_state(base_state)
+print(start_state)
 puzzle = PuzzleAStar15(start_state)
 solution = a_star_search(puzzle, start_state)
 
