@@ -26,8 +26,19 @@ class PuzzleAStar15:
         return state == self.goal_state
 
     def heuristic(self, state):
-        # 這裡可以根據需要選擇合適的啟發式函數
-        return sum([1 if state[i] != self.goal_state[i] else 0 for i in range(16)])
+        index_map = self.get_index_map(self.goal_state)
+        distance = 0
+        for i in range(16):
+            if state[i] != 'x':
+                ideal_position = index_map[state[i]]
+                current_row, current_col = i // 4, i % 4
+                ideal_row, ideal_col = ideal_position // 4, ideal_position % 4
+                distance += abs(current_row - ideal_row) + abs(current_col - ideal_col)
+        return distance
+
+    @staticmethod
+    def get_index_map(state):
+        return {state[i]: i for i in range(len(state)) if state[i] != 'x'}
 
 def get_index_map(goal_state):
     return {char: index for index, char in enumerate(goal_state)}
